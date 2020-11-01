@@ -1,23 +1,39 @@
 const CustomError = require("../extensions/custom-error");
 
 module.exports = function transform(arr) {
-     if (typeof (arr)!=='object'){
-        return 'Error, arr is not an object'
+    if (arr === null || arr === []) return [];
+
+    if (!Array.isArray(arr)) throw new Error('Not array');
+
+    let result = [];
+
+    for (let i = 0; i < arr.length; i++) {
+        let item = arr[i];
+
+        switch (item) {
+            case '--discard-next':
+                i++;
+                break;
+            case '--discard-prev':
+                if (result.length !== 0 && arr[i - 2] !== '--discard-next') {
+                    result.pop();
+                }
+                break;
+            case '--double-next':
+                if (i + 1 < arr.length) {
+                    result.push(arr[i + 1]);
+                }
+                break;
+            case '--double-prev':
+                if (i - 1 > -1 && arr[i - 2] !== '--discard-next') {
+                    result.push(arr[i - 1]);
+                }
+                break;
+            default:
+                result.push(item);
+        }
     }
-    let new_arr=arr;
-    for (let i=0; i<new_arr.length; i++){
-        if (new_arr[i]==='--discard-next'){
-            new_arr.splice(i, 2)
-        }
-        if (new_arr[i]==='--discard-prev'){
-            new_arr.splice(i-1, 2)
-        }
-        if (new_arr[i]==='--double-next'){
-            new_arr.splice(i,1,arr[i+1])
-        }
-        if (new_arr[i]==='--double-prev'){
-            new_arr.splice(i,1,arr[i-1])
-        }
-    }
-    return new_arr
+
+    return result;
 };
+
